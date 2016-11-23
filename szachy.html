@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>JS Bin</title>
+</head>
+<body>
+  <h2 id="ktoryGracz">Ruch wykonuje gracz nr </h2>
+<canvas id="szachownica"/>
+<script>
+(function(){
+var gracz = 1;
+var img = new Image();
+img.src = "http://userpages.umbc.edu/~mcdo/486/pieces.png";
+var ktoryGracz = document.getElementById("ktoryGracz");
+ktoryGracz.innerHTML = "Ruch wykonuje gracz nr " + gracz;
+
+var canvas = document.getElementById("szachownica");
+canvas.width = 400;
+canvas.height = 400;
+var ctx = canvas.getContext("2d");
+function getMousePos(canvas, evt) {
+  var rect = canvas.getBoundingClientRect();
+    return {
+      x: evt.clientX - rect.left,
+      y: evt.clientY - rect.top
+  };
+}
+
+canvas.addEventListener('mousedown', function(evt) {
+  var mousePos = getMousePos(canvas, evt);
+  var message = 'Mouse position: ' + mousePos.x + ',' + mousePos.y;
+  drag = true;
+  dragPiece(mousePos.x, mousePos.y)
+}, false);
+canvas.addEventListener('mouseup', function(evt) {
+  var mousePos = getMousePos(canvas, evt);
+  var message = 'Mouse position: ' + mousePos.x + ',' + mousePos.y;
+  drag = false;
+  dragPiece();
+}, false);
+
+var mouseX, mouseY, pieceI;
+  canvas.addEventListener('mousemove', function(evt) {
+  var mousePos = getMousePos(canvas, evt);
+    mouseX = mousePos.x;
+    mouseY = mousePos.y;
+  }, false);
+    
+var drag = false;
+
+function dragPiece(x,y)
+{
+  if(drag)
+    {
+  var posX = getXPos(x);
+  var posY = getYPos(y);
+  var i = 0;
+  for(i = 0; i < 32; i++)
+    {
+    if(getXPos(chessPiece[i].x) === posX && getYPos(chessPiece[i].y) === posY)
+      {
+        break;
+      }
+    }
+  pieceI = i;
+  console.log(i);
+    }
+  //console.log(chessPiece,i);
+//  while(drag)
+//    {
+  else
+    {
+      var x_out = getXPos(mouseX);
+      var y_out = getYPos(mouseY);
+      if(chessPiece[pieceI].color === "White" && gracz === 1 || chessPiece[pieceI].color === "Black" && gracz === 2)
+      if(chessPiece[pieceI].checkIfPossible(x_out,y_out))
+        {
+          var check = chessPiece[pieceI].checkForCollission(x_out,y_out);
+          if(check[0] === "none")
+          {
+            chessPiece[pieceI].x = getX(x_out);
+            chessPiece[pieceI].y = getY(y_out);
+            gracz = gracz%2+1;
+            ktoryGracz.innerHTML = "Ruch wykonuje gracz nr " + gracz;
+
+            
+          }
+          else if(check[0] === "different color")
+          {
+            chessPiece[check[1]].x = getX(1000);
+            chessPiece[check[1]].y = getY(1000);
+            chessPiece[pieceI].x = getX(x_out);
+            chessPiece[pieceI].y = getY(y_out);
+            gracz = gracz%2+1;
+            ktoryGracz.innerHTML = "Ruch wykonuje gracz nr " + gracz;
+
+          }
+      drawChessBoard();
+        }
+}
+}
+function getXPos(x)
+{
+  var i;
+  for(i = 0; i < 8; i++)
+    if(x < width*scale*(i+1))
+      break;
+  return i;
+}
+function getYPos(y)
+{
+  var i;
+  for(i = 0; i < 8; i++)
+    if(y < height*scale*(i+1))
+      break;
+  return i;
+}
+var width = 480/6;
+var height = 162/2;
+var scale = 0.5;
+function getX(x)
+{
+  return x*width*scale;
+}
+function getY(y)
+{
+  return y*height*scale;
+}
+function drawRook(color,x,y){
+  if(color == "white")
+    ctx.drawImage(img,0,0,width,height,getX(x),getY(y),width*scale,height*scale);
+  else
+    ctx.drawImage(img,width*3,0,width,height,getX(x),getY(y),width*scale,height*scale);
+}
+function drawKnight(color,x,y){
+  if(color == "white")
+    ctx.drawImage(img,0,height,width,height,getX(x),getY(y),width*scale,height*scale);
+  else
+    ctx.drawImage(img,width*3,height,width,height,getX(x),getY(y),width*scale,height*scale);
+}
+function drawQueen(color,x,y)
+{
+  if(color == "white")
+    ctx.drawImage(img,width,0,width,height,getX(x),getY(y),width*scale,height*scale);
+  else
+    ctx.drawImage(img,width*4,0,width,height,getX(x),getY(y),width*scale,height*scale);
+}
+function drawKing(color,x,y)
+{
+  if(color == "white")
+    ctx.drawImage(img,width,height,width,height,getX(x),getY(y),width*scale,height*scale);
+  else
+    ctx.drawImage(img,width*4,height,width,height,getX(x),getY(y),width*scale,height*scale);
+}
+function drawPawn(color,x,y)
+{
+  if(color == "white")
+    ctx.drawImage(img,width*2,0,width,height,getX(x),getY(y),width*scale,height*scale);
+  else
+    ctx.drawImage(img,width*5,0,width,height,getX(x),getY(y),width*scale,height*scale);
+}
+function drawBishop(color,x,y)
+{
+  if(color == "white")
+    ctx.drawImage(img,width*2,height,width,height,getX(x),getY(y),width*scale,height*scale);
+  else
+    ctx.drawImage(img,width*5,height,width,height,getX(x),getY(y),width*scale,height*scale);
+}
+
+
+
+function drawPiece(x,y,type,color){
+  if(type.toLowerCase() === "Rook".toLowerCase())
+    if(color.toLowerCase() == "white")
+      ctx.drawImage(img,0,0,width,height,x,y,width*scale,height*scale);
+    else
+      ctx.drawImage(img,width*3,0,width,height,x,y,width*scale,height*scale);
+  
+  if(type.toLowerCase() === "Knight".toLowerCase())
+    if(color.toLowerCase() == "white")
+      ctx.drawImage(img,0,height,width,height,x,y,width*scale,height*scale);
+    else
+      ctx.drawImage(img,width*3,height,width,height,x,y,width*scale,height*scale);
+  
+  if(type.toLowerCase() === "Queen".toLowerCase())
+    if(color.toLowerCase() == "white")
+      ctx.drawImage(img,width,0,width,height,x,y,width*scale,height*scale);
+    else
+      ctx.drawImage(img,width*4,0,width,height,x,y,width*scale,height*scale);
+  
+  if(type.toLowerCase() === "King".toLowerCase())
+    if(color.toLowerCase() == "white")
+      ctx.drawImage(img,width,height,width,height,x,y,width*scale,height*scale);
+    else
+      ctx.drawImage(img,width*4,height,width,height,x,y,width*scale,height*scale);
+
+  if(type.toLowerCase() === "Pawn".toLowerCase())
+    if(color.toLowerCase() == "white")
+      ctx.drawImage(img,width*2,0,width,height,x,y,width*scale,height*scale);
+    else
+      ctx.drawImage(img,width*5,0,width,height,x,y,width*scale,height*scale);
+
+  if(type.toLowerCase() === "Bishop".toLowerCase())
+    if(color.toLowerCase() == "white")
+      ctx.drawImage(img,width*2,height,width,height,x,y,width*scale,height*scale);
+    else
+      ctx.drawImage(img,width*5,height,width,height,x,y,width*scale,height*scale);
+}
+
+
+
+function drawChessBoard()
+{
+  for(var j = 0; j < 8; j++)
+    {
+      for(var k = 0; k < 8; k++)
+        {
+          var x = j * width*scale;
+          var y = k * height*scale;
+          if((j+k)%2)
+            ctx.fillStyle = "#444444";
+          else 
+            ctx.fillStyle = "#FFFFFF";
+          ctx.fillRect(x,y,width*scale,height*scale)
+        }
+    }
+  for(var i = 0; i < chessPiece.length; i++)
+  {
+    chessPiece[i].drawPiece();
+  }
+}
+
+function Piece(x,y,type,color,i)
+{
+  this.i = i;
+  this.x = x;
+  this.y = y;
+  this.type = type;
+  this.color = color;
+  this.drawPiece = function(){
+    drawPiece(this.x,this.y,this.type,this.color);
+  }
+  this.checkIfPossible = function(x_out,y_out)
+  {
+    var direction;
+    var posX = getXPos(this.x);
+    var posY = getYPos(this.y);
+    if(this.color === "Black")
+      direction = 1;
+    else
+      direction = -1;
+    if(this.type === "Pawn")
+    {
+      console.log(posY + " " + y_out);
+      if(posX === x_out && posY === y_out - direction)
+        {
+          return true;
+        }
+      else return false;
+    }
+    if(this.type === "Knight")
+      {
+        if((posX-x_out === 2 || posX-x_out === -2) && (posY - y_out === 1 || posY - y_out === -1))
+           return true;
+        else if((posX-x_out === 1 || posX-x_out === -1) && (posY - y_out === 2 || posY - y_out === -2))
+           return true;
+        else return false;
+      }
+    if(this.type === "Rook")
+      {
+        if(posX === x_out || posY === y_out)
+          return true;
+        else return false;
+      }
+    if(this.type === "Bishop")
+      {
+        if(posX-x_out === posY-y_out || posX-x_out === -(posY-y_out))
+          return true;
+        else return false;
+      }
+    if(this.type === "Queen")
+      {
+        if(posX-x_out === posY-y_out || posX-x_out === -(posY-y_out))
+          return true;
+        else if(posX === x_out || posY === y_out)
+          return true;
+        else return false;
+      }
+    if(this.type === "King")
+      {
+        if(posX-x_out >= -1 && posX-x_out<=1 && posY-y_out >= -1 && posY-y_out <=1)
+        if(posX-x_out === posY-y_out || posX-x_out === -(posY-y_out))
+          return true;
+        else if(posX === x_out || posY === y_out)
+          return true;
+        else return false;
+      }
+  }
+  this.checkForCollission = function(x_out,y_out)
+  {
+    for(i = 0; i <= 32; i++)
+    {
+      if(this.i === i)
+        continue;
+      if(i < 32)
+      if(getXPos(chessPiece[i].x) === x_out && getYPos(chessPiece[i].y) === y_out)
+      {
+        if(chessPiece[i].color === this.color)
+          return ["same color",i];
+        else
+          return ["different color",i];
+        break;
+      }
+      if(i === 32)
+        return ["none"];
+    }
+  }
+}
+
+var chessPiece = [{}];
+
+function generatePieces()
+{
+  chessPiece[0] = new Piece(getX(0),getY(6),"Pawn","White",0);
+  chessPiece[1] = new Piece(getX(1),getY(6),"Pawn","White",1);
+  chessPiece[2] = new Piece(getX(2),getY(6),"Pawn","White",2);
+  chessPiece[3] = new Piece(getX(3),getY(6),"Pawn","White",3);
+  chessPiece[4] = new Piece(getX(4),getY(6),"Pawn","White",4);
+  chessPiece[5] = new Piece(getX(5),getY(6),"Pawn","White",5);
+  chessPiece[6] = new Piece(getX(6),getY(6),"Pawn","White",6);
+  chessPiece[7] = new Piece(getX(7),getY(6),"Pawn","White",7);
+  chessPiece[8] = new Piece(getX(0),getY(1),"Pawn","Black",8);
+  chessPiece[9] = new Piece(getX(1),getY(1),"Pawn","Black",9);
+  chessPiece[10] = new Piece(getX(2),getY(1),"Pawn","Black",10);
+  chessPiece[11] = new Piece(getX(3),getY(1),"Pawn","Black",11);
+  chessPiece[12] = new Piece(getX(4),getY(1),"Pawn","Black",12);
+  chessPiece[13] = new Piece(getX(5),getY(1),"Pawn","Black",13);
+  chessPiece[14] = new Piece(getX(6),getY(1),"Pawn","Black",14);
+  chessPiece[15] = new Piece(getX(7),getY(1),"Pawn","Black",15);
+  chessPiece[16] = new Piece(getX(0),getY(7),"Rook","White",16);
+  chessPiece[17] = new Piece(getX(7),getY(7),"Rook","White",17);
+  chessPiece[18] = new Piece(getX(0),getY(0),"Rook","Black",18);
+  chessPiece[19] = new Piece(getX(7),getY(0),"Rook","Black",19);
+  chessPiece[20] = new Piece(getX(1),getY(7),"Knight","White",20);
+  chessPiece[21] = new Piece(getX(6),getY(7),"Knight","White",21);
+  chessPiece[22] = new Piece(getX(1),getY(0),"Knight","Black",22);
+  chessPiece[23] = new Piece(getX(6),getY(0),"Knight","Black",23);
+  chessPiece[24] = new Piece(getX(2),getY(7),"Bishop","White",24);
+  chessPiece[25] = new Piece(getX(5),getY(7),"Bishop","White",25);
+  chessPiece[26] = new Piece(getX(2),getY(0),"Bishop","Black",26);
+  chessPiece[27] = new Piece(getX(5),getY(0),"Bishop","Black",27);
+  chessPiece[28] = new Piece(getX(3),getY(7),"Queen","White",28);
+  chessPiece[29] = new Piece(getX(3),getY(0),"Queen","Black",29);
+  chessPiece[30] = new Piece(getX(4),getY(7),"King","White",30);
+  chessPiece[31] = new Piece(getX(4),getY(0),"King","Black",31);
+}
+
+generatePieces();
+drawChessBoard();
+})();
+
+
+
+</script>
+</body>
+</html>
