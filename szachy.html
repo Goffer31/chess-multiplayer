@@ -6,20 +6,19 @@
   <title>JS Bin</title>
 </head>
 <body>
-  <h2 id="ktoryGracz">Ruch wykonuje gracz nr </h2>
-<canvas id="szachownica"/>
+  <h2 id="ktoryGracz"></h2>
+
+  
 <script>
-(function(){
-var gracz = 1;
 var img = new Image();
 img.src = "http://userpages.umbc.edu/~mcdo/486/pieces.png";
-var ktoryGracz = document.getElementById("ktoryGracz");
-ktoryGracz.innerHTML = "Ruch wykonuje gracz nr " + gracz;
+</script>
+<div>
+  <input type="button" onclick="wykonaj()" id="btn_rozpocznij" value="Rozpocznij grę"></input>
+</div>
+<canvas id="szachownica"/>
 
-var canvas = document.getElementById("szachownica");
-canvas.width = 400;
-canvas.height = 400;
-var ctx = canvas.getContext("2d");
+<script>
 function getMousePos(canvas, evt) {
   var rect = canvas.getBoundingClientRect();
     return {
@@ -27,29 +26,6 @@ function getMousePos(canvas, evt) {
       y: evt.clientY - rect.top
   };
 }
-
-canvas.addEventListener('mousedown', function(evt) {
-  var mousePos = getMousePos(canvas, evt);
-  var message = 'Mouse position: ' + mousePos.x + ',' + mousePos.y;
-  drag = true;
-  dragPiece(mousePos.x, mousePos.y)
-}, false);
-canvas.addEventListener('mouseup', function(evt) {
-  var mousePos = getMousePos(canvas, evt);
-  var message = 'Mouse position: ' + mousePos.x + ',' + mousePos.y;
-  drag = false;
-  dragPiece();
-}, false);
-
-var mouseX, mouseY, pieceI;
-  canvas.addEventListener('mousemove', function(evt) {
-  var mousePos = getMousePos(canvas, evt);
-    mouseX = mousePos.x;
-    mouseY = mousePos.y;
-  }, false);
-    
-var drag = false;
-
 function dragPiece(x,y)
 {
   if(drag)
@@ -84,13 +60,19 @@ function dragPiece(x,y)
             chessPiece[pieceI].y = getY(y_out);
             gracz = gracz%2+1;
             ktoryGracz.innerHTML = "Ruch wykonuje gracz nr " + gracz;
-
-            
           }
           else if(check[0] === "different color")
           {
-            chessPiece[check[1]].x = getX(1000);
-            chessPiece[check[1]].y = getY(1000);
+            if(chessPiece[check[1]].color === "White")
+            {
+              chessPiece[check[1]].x = getX(xPlayer1++);
+              chessPiece[check[1]].y = getY(7);
+            }
+            else
+            {
+              chessPiece[check[1]].x = getX(xPlayer2++);
+              chessPiece[check[1]].y = getY(0);                
+            }
             chessPiece[pieceI].x = getX(x_out);
             chessPiece[pieceI].y = getY(y_out);
             gracz = gracz%2+1;
@@ -117,9 +99,6 @@ function getYPos(y)
       break;
   return i;
 }
-var width = 480/6;
-var height = 162/2;
-var scale = 0.5;
 function getX(x)
 {
   return x*width*scale;
@@ -270,23 +249,203 @@ function Piece(x,y,type,color,i)
       }
     if(this.type === "Rook")
       {
-        if(posX === x_out || posY === y_out)
-          return true;
-        else return false;
+        if(posX === x_out)
+          {
+            var dist = posY-y_out;
+            console.log(dist);
+            for(var z = 1; z < dist; z++)
+            {
+              for(i = 0; i < 32; i++)
+              {
+                if(getXPos(chessPiece[i].x) === posX && (getYPos(chessPiece[i].y) === posY-z))
+                  return false;
+              }
+            }
+            for(var z = -1; z > dist; z--)
+            {
+              for(i = 0; i < 32; i++)
+              {
+                if(getXPos(chessPiece[i].x) === posX && (getYPos(chessPiece[i].y) === posY-z))
+                  return false;
+              }
+            }
+            return true;
+          }
+        if(posY === y_out)
+          {
+            var dist = posX-x_out;
+            console.log(dist);
+            for(var z = 1; z < dist; z++)
+            {
+              for(i = 0; i < 32; i++)
+              {
+                if(getYPos(chessPiece[i].y) === posY && (getXPos(chessPiece[i].x) === posX-z))
+                  return false;
+              }
+            }
+            for(var z = -1; z > dist; z--)
+            {
+              for(i = 0; i < 32; i++)
+              {
+                if(getYPos(chessPiece[i].y) === posY && (getXPos(chessPiece[i].x) === posX-z))
+                  return false;
+              }
+            }
+            return true;            
+          }
+          //return true;
+        //else return false;
       }
     if(this.type === "Bishop")
       {
-        if(posX-x_out === posY-y_out || posX-x_out === -(posY-y_out))
-          return true;
-        else return false;
+                    var dist = posX-x_out;
+
+                    console.log(dist);
+        console.log((posX-x_out) + " " + (posY-y_out))
+        if(posX-x_out === posY-y_out)
+          {
+            console.log(dist);
+            for(var z = 1; z < dist; z++)
+            {
+              for(i = 0; i < 32; i++)
+              {
+                if(getYPos(chessPiece[i].y) === posY-z && (getXPos(chessPiece[i].x) === posX-z))
+                  {
+                    console.log("C");
+                  return false;
+                  }
+                
+              }
+            }
+            for(var z = -1; z > dist; z--)
+            {
+              for(i = 0; i < 32; i++)
+              {
+                if(getYPos(chessPiece[i].y) === posY-z && (getXPos(chessPiece[i].x) === posX-z))
+                  {
+                    console.log("d");
+                  return false;
+                  }
+              }
+            }
+            console.log("a");
+            return true;             
+          }
+        if(posX-x_out === y_out-posY)
+        {
+            var dist = posX-x_out;
+            for(var z = 1; z < dist; z++)
+            {
+              for(i = 0; i < 32; i++)
+              {
+                if(getYPos(chessPiece[i].y) === posY-z && (getXPos(chessPiece[i].x) === posX-z))
+                  return false;
+              }
+            }
+            for(var z = -1; z > dist; z--)
+            {
+              for(i = 0; i < 32; i++)
+              {
+                if(getYPos(chessPiece[i].y) === posY-z && (getXPos(chessPiece[i].x) === posX-z))
+                  return false;
+              }
+            }
+          return true;    
+        }
+        return false;
       }
     if(this.type === "Queen")
       {
-        if(posX-x_out === posY-y_out || posX-x_out === -(posY-y_out))
-          return true;
-        else if(posX === x_out || posY === y_out)
-          return true;
-        else return false;
+        if(posX === x_out)
+          {
+            var dist = posY-y_out;
+            console.log(dist);
+            for(var z = 1; z < dist; z++)
+            {
+              for(i = 0; i < 32; i++)
+              {
+                if(getXPos(chessPiece[i].x) === posX && (getYPos(chessPiece[i].y) === posY-z))
+                  return false;
+              }
+            }
+            for(var z = -1; z > dist; z--)
+            {
+              for(i = 0; i < 32; i++)
+              {
+                if(getXPos(chessPiece[i].x) === posX && (getYPos(chessPiece[i].y) === posY-z))
+                  return false;
+              }
+            }
+            return true;
+          }
+        if(posY === y_out)
+          {
+            var dist = posX-x_out;
+            console.log(dist);
+            for(var z = 1; z < dist; z++)
+            {
+              for(i = 0; i < 32; i++)
+              {
+                if(getYPos(chessPiece[i].y) === posY && (getXPos(chessPiece[i].x) === posX-z))
+                  return false;
+              }
+            }
+            for(var z = -1; z > dist; z--)
+            {
+              for(i = 0; i < 32; i++)
+              {
+                if(getYPos(chessPiece[i].y) === posY && (getXPos(chessPiece[i].x) === posX-z))
+                  return false;
+              }
+            }
+            return true;            
+          }
+        if(posX-x_out === posY-y_out)
+          {
+            var dist = posX-x_out;
+            //console.log(dist);
+            for(var z = 1; z < dist; z++)
+            {
+              for(i = 0; i < 32; i++)
+              {
+                if(getYPos(chessPiece[i].y) === posY-z && (getXPos(chessPiece[i].x) === posX-z))
+                  return false;
+              }
+            }
+            for(var z = -1; z > dist; z--)
+            {
+              for(i = 0; i < 32; i++)
+              {
+                if(getYPos(chessPiece[i].y) === posY-z && (getXPos(chessPiece[i].x) === posX-z))
+                  return false;
+              }
+            }
+            console.log("a");
+            return true;             
+          }
+        if(posX-x_out === y_out-posY)
+        {
+            var dist = posX-x_out;
+            for(var z = 1; z < dist; z++)
+            {
+              for(i = 0; i < 32; i++)
+              {
+                if(getYPos(chessPiece[i].y) === posY+z && (getXPos(chessPiece[i].x) === posX+z))
+                  return false;
+              }
+            }
+            for(var z = -1; z > dist; z--)
+            {
+              for(i = 0; i < 32; i++)
+              {
+                if(getYPos(chessPiece[i].y) === posY+z && (getXPos(chessPiece[i].x) === posX+z))
+                  return false;
+              }
+            }
+          return true;    
+        }
+        return false;
+
       }
     if(this.type === "King")
       {
@@ -318,9 +477,6 @@ function Piece(x,y,type,color,i)
     }
   }
 }
-
-var chessPiece = [{}];
-
 function generatePieces()
 {
   chessPiece[0] = new Piece(getX(0),getY(6),"Pawn","White",0);
@@ -357,11 +513,45 @@ function generatePieces()
   chessPiece[31] = new Piece(getX(4),getY(0),"King","Black",31);
 }
 
+function wykonaj(){
+document.getElementById("btn_rozpocznij").hidden="hidden";
+ktoryGracz.innerHTML = "Ruch wykonuje gracz nr " + gracz;
+
+canvas.addEventListener('mousedown', function(evt) {
+  var mousePos = getMousePos(canvas, evt);
+  var message = 'Mouse position: ' + mousePos.x + ',' + mousePos.y;
+  drag = true;
+  dragPiece(mousePos.x, mousePos.y)
+}, false);
+canvas.addEventListener('mouseup', function(evt) {
+  var mousePos = getMousePos(canvas, evt);
+  var message = 'Mouse position: ' + mousePos.x + ',' + mousePos.y;
+  drag = false;
+  dragPiece();
+}, false);
+  canvas.addEventListener('mousemove', function(evt) {
+  var mousePos = getMousePos(canvas, evt);
+    mouseX = mousePos.x;
+    mouseY = mousePos.y;
+  }, false);
+
 generatePieces();
 drawChessBoard();
-})();
-
-
+}
+var gracz = 1;
+var drag = false;
+var width = 480/6;
+var height = 162/2;
+var scale = 0.5;
+var chessPiece = [{}];
+var ktoryGracz = document.getElementById("ktoryGracz");
+var canvas = document.getElementById("szachownica");
+canvas.width = 400;
+canvas.height = 400;
+var ctx = canvas.getContext("2d");
+var mouseX, mouseY, pieceI;
+var xPlayer1 = 8;
+var xPlayer2 = 8;
 
 </script>
 </body>
