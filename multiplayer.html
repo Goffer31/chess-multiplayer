@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Szachy w wykonaniu Goffera!</title>
+</head>
+<body>
+  <h2 id="ktoryGracz"></h2>
+  <div id="touchstart"></div>
+  <div id="touchend"></div>
+  
+<script>
+var img = new Image();
+img.src = "http://userpages.umbc.edu/~mcdo/486/pieces.png";
+</script>
+<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+<label name="in_username">Podaj swój nick</label>
+<input type="text" id="in_username" >
+<input type="button" id="btn_username" onclick="Client.Heartbeat()" value="Wprowadź"><br>
+<label name="sit_p1" id="label_p1" hidden="hidden">Brak gracza 1, zajmij jego miejsce</label>
+<input type="button" id="sit_p1" onclick="gracz1_put()" value="Usiądź jako gracz 1" hidden="hidden"><br>
+<label name="sit_p2" id="label_p2" hidden="hidden">Brak gracza 2, zajmij jego miejsce</label>
+<input type="button" id="sit_p2" onclick="gracz2_put()" value="Usiądź jako gracz 2" hidden="hidden"><br>
+<br/>
+<input type="button" id="next_round" onclick="graj()" value="Wciśnij">
+<div>
+<input type="button" onclick="wykonaj()" id="btn_rozpocznij" value="Rozpocznij grę"></input>
+</div>
+ <canvas id="szachownica"/>
+ <script>var round = 0;
+</script>
+  <script src="multiplayer.js"></script>
+<script>
+var id = 0;
+var move = 0;
+var gracz;
+function graj()
+{
+	if(round%2 == 0 && id == 1 || round%2 == 1 && id == 2)
+		move = 1;
+}
+var player = 0;
+function gracz1_put(){
+	if(id !== 2){
+		id = 1;
+		$("#sit_p1").attr("disabled",true);
+	}
+}
+function gracz2_put(){
+	if(id !== 1)
+	{
+		id = 2;
+		$("#sit_p2").attr("disabled",true);
+	}
+}
+var Client = Client || {};
+Client.Pulse = null; 
+Client.Heartbeat = function(){
+  var sUsername = document.getElementById("in_username").value;
+  $.ajax({ 
+    url : 'echo_raw.php',
+    type : 'post',
+    dataType : 'json',
+    data : {Username : sUsername, Active: id, Move: move},
+    success : function(jActiveUsers,sStatus,jqXHR){ 
+
+      Client.RenderActiveUsers(jActiveUsers); 
+      Client.Pulse = setTimeout(function(){
+        Client.Heartbeat();
+      },2000); 
+    }
+  });
+}
+
+Client.RenderActiveUsers = function(jActiveUsers,sStatus,jqXHR){
+	var isP1 = 0;
+	var isP2 = 0;
+	for(var i = 0; i < jActiveUsers.length; i++)
+	{
+		if(jActiveUsers[i].Active == 1)
+		{
+			isP1 = 1;
+			if(id==1)
+				player = i;
+			$("#sit_p1").attr("hidden",true);
+                        $("#label_p1").attr("hidden",true);
+		}
+		if(jActiveUsers[i].Active == 2)
+		{
+			isP2 = 1;
+			if(id===2)
+				player = i;
+			$("#sit_p2").attr("hidden",true);
+                        $("#label_p2").attr("hidden",true);
+		}
+		if(!isP1)
+                {
+			$("#sit_p1").attr("hidden",false);
+                        $("#label_p1").attr("hidden",false);
+                }
+		if(!isP2)
+                {
+			$("#sit_p2").attr("hidden",false);
+                        $("#label_p2").attr("hidden",false);
+                }
+	//	console.log(jActiveUsers[i]);
+	}
+	round = jActiveUsers[0].Round;
+	move = 0;
+	drawChessBoard();
+	gracz = round%2 + 1;
+}
+</script>
+  <div id="game_over"></div>
+
+
+
+
+</body>
+</html>
